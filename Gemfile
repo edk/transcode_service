@@ -1,18 +1,21 @@
 source 'https://rubygems.org'
 
 
-gem 'rails', '4.2.0.beta4'
+gem 'rails', '4.1.8'
 gem 'rails-api'
+gem 'active_model_serializers'
 gem 'sqlite3'
 
 # Use unicorn as the app server
 # gem 'unicorn'
 
-# Deploy with Capistrano
-gem 'spring', :group => :development
-gem 'capistrano', :group => :development
-gem 'guard', :group => :development
-gem 'guard-minitest', :group => :development
-
-# To use debugger
-# gem 'ruby-debug19', :require => 'ruby-debug'
+group :development do
+  gem 'spring'
+  gem 'capistrano'
+  gem 'guard'
+  gem 'guard-minitest'
+  # brew install terminal-notifier
+  gem 'terminal-notifier-guard'
+  gem 'factory_girl_rails'
+  gem 'debugger'
+end
