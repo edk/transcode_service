@@ -2,7 +2,7 @@ require 'test_helper'
 
 class TranscodeJobsControllerTest < ActionController::TestCase
   setup do
-    @transcode_job = transcode_jobs(:one)
+    @transcode_job = FactoryGirl.create(:transcode_job)
   end
 
   test "should get index" do

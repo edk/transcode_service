@@ -50,7 +50,7 @@ class TranscodeJobsController < ApplicationController
 
   private
     
-    def transcode_job_params
-      params.require(:transcode_job).permit(:status, :params)
-    end
+  def transcode_job_params
+    params.require(:transcode_job).permit(:status, :params)
+  end
 end
