@@ -3,12 +3,27 @@ require 'test_helper'
 class TranscodeJobsControllerTest < ActionController::TestCase
   setup do
     @transcode_job = FactoryGirl.create(:transcode_job)
+    @api_token     = FactoryGirl.create(:api_token)
+    @encoded = token_header(@api_token.token)
+    request.headers['Authorization'] = @encoded  # set to nil to test non-auth access
+    request.headers['Accept'] = 'application/json'
+  end
+
+  test 'invalid auth token' do
+    request.headers['Authorization'] = nil
+    get :index, {}
+    assert_response 401
+    puts "response.content_type = #{response.content_type.inspect}"
+    assert_equal response.content_type, Mime::JSON
   end
 
   test "should get index" do
-    get :index
+    # or for fun manually:
+    # curl -IH 'Authorization: Token token=5189dd68172f54c193eb94ffa52ad125' 127.0.0.1:3001/transcode_jobs/
+    get :index, {}
     assert_response :success
     assert_not_nil assigns(:transcode_jobs)
+    assert_equal response.content_type, Mime::JSON
   end
 
   test "should create transcode_job" do
