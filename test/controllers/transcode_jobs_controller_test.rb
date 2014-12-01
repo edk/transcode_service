@@ -12,8 +12,8 @@ class TranscodeJobsControllerTest < ActionController::TestCase
   test 'invalid auth token' do
     request.headers['Authorization'] = nil
     get :index, {}
+    
     assert_response 401
-    puts "response.content_type = #{response.content_type.inspect}"
     assert_equal response.content_type, Mime::JSON
   end
 
