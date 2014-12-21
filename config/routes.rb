@@ -1,3 +1,5 @@
 Rails.application.routes.draw do
-  resources :transcode_jobs, except: [:new, :edit]
+  namespace :api do
+    resources :transcode_jobs, except: [:new, :edit]
+  end
 end

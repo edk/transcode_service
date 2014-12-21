@@ -1,4 +1,4 @@
-class TranscodeJobsController < ApplicationController
+class Api::TranscodeJobsController < ApplicationController
   # GET /transcode_jobs
   # GET /transcode_jobs.json
   def index
@@ -21,7 +21,7 @@ class TranscodeJobsController < ApplicationController
     @transcode_job = TranscodeJob.new(transcode_job_params)
 
     if @transcode_job.save
-      render json: @transcode_job, status: :created, location: @transcode_job
+      render json: @transcode_job, status: :created, location: [:api, @transcode_job]
     else
       render json: @transcode_job.errors, status: :unprocessable_entity
     end
