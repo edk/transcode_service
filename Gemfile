@@ -5,6 +5,7 @@ gem 'rails', '4.1.8'
 gem 'rails-api'
 gem 'active_model_serializers'
 gem 'sqlite3'
+gem 'aasm'
 
 # Use unicorn as the app server
 # gem 'unicorn'

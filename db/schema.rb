@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141201022757) do
+ActiveRecord::Schema.define(version: 20141221194333) do
 
   create_table "api_tokens", force: true do |t|
     t.string   "user"
@@ -22,8 +22,15 @@ ActiveRecord::Schema.define(version: 20141201022757) do
 
   add_index "api_tokens", ["token"], name: "index_api_tokens_on_token", unique: true
 
+  create_table "transcode_events", force: true do |t|
+    t.integer  "transcode_job_id"
+    t.string   "data"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "transcode_jobs", force: true do |t|
-    t.string   "status"
+    t.string   "aasm_state"
     t.text     "params"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
