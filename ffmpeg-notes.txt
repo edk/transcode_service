@@ -1,0 +1,19 @@
+To get a usable ffmpeg for testing on OSX using homebrew (from https://trac.ffmpeg.org/wiki/CompilationGuide/MacOSX):
+brew install ffmpeg --with-fdk-aac --with-ffplay --with-freetype --with-libass --with-libquvi --with-libvorbis --with-libvpx --with-opus --with-x265
+
+Use brew to install p7zip
+Download static OSX binary: http://evermeet.cx/ffmpeg/
+unpack with `7z x ffmpeg-2.4.4.7z` and move to somewhere in your path (/usr/loca/bin/ potentially overwriting an existing brew installed version)
+
+on ubuntu 14.x: (from http://askubuntu.com/questions/432542/is-ffmpeg-missing-from-the-official-repositories-in-14-04)
+sudo add-apt-repository ppa:mc3man/trusty-media
+apt-get install ffmpeg
+starting in ubuntu 15.04, ffmpeg returns to the official repos
+
+Or DL and install static binaries from: http://johnvansickle.com/ffmpeg/releases/ffmpeg-2.5.2-64bit-static.tar.xz
+or DL and install from source to get the theora codec working:
+https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
+sudo apt-get -y install autoconf automake build-essential libass-dev libfreetype6-dev libgpac-dev libtheora-dev libtool libvorbis-dev pkg-config texi2html zlib1g-dev
+apt-get install yasm
+apt-get install libx264-dev libmp3lame-dev
+PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./configure   --prefix="$HOME/ffmpeg_build"   --extra-cflags="-I$HOME/ffmpeg_build/include"   --extra-ldflags="-L$HOME/ffmpeg_build/lib"   --bindir="$HOME/bin"   --enable-gpl   --enable-libass      --enable-libfreetype   --enable-libmp3lame      --enable-libtheora   --enable-libvorbis     --enable-libx264   --enable-nonfree

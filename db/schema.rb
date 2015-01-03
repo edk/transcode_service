@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141221194333) do
+ActiveRecord::Schema.define(version: 20141221223052) do
 
   create_table "api_tokens", force: true do |t|
     t.string   "user"
@@ -34,6 +34,21 @@ ActiveRecord::Schema.define(version: 20141221194333) do
     t.text     "params"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "video_assets", force: true do |t|
+    t.integer  "original_id"
+    t.string   "type"
+    t.string   "thumbnail_file_name"
+    t.string   "thumbnail_content_type"
+    t.integer  "thumbnail_file_size"
+    t.datetime "thumbnail_updated_at"
+    t.string   "asset_file_name"
+    t.string   "asset_content_type"
+    t.integer  "asset_file_size"
+    t.datetime "asset_updated_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
 end

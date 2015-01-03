@@ -1,14 +1,13 @@
 source 'https://rubygems.org'
 
-
 gem 'rails', '4.1.8'
 gem 'rails-api'
 gem 'active_model_serializers'
 gem 'sqlite3'
+gem 'paperclip', '~> 4.2'
+gem 'av', :github => 'edk/av', :branch => 'master'
+gem 'paperclip-av-transcoder'
 gem 'aasm'
-
-# Use unicorn as the app server
-# gem 'unicorn'
 
 group :development do
   gem 'spring'
@@ -18,5 +17,5 @@ group :development do
   # brew install terminal-notifier
   gem 'terminal-notifier-guard'
   gem 'factory_girl_rails'
-  gem 'debugger'
+  gem 'byebug'
 end
