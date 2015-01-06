@@ -5,15 +5,15 @@ class TranscodeEventTest < ActiveSupport::TestCase
     job = FactoryGirl.create(:transcode_job)
     job.run
     job.save!
-    assert_equal job.events.size, 1
+    job.reload
+    assert_equal 1, job.events.size
 
     # if you don't save the object, the associated objects don't get saved either
     job.complete!
-    job.reload
-    assert_equal job.events.size, 1
+    assert_equal 2, job.events.size
 
     job.complete!
     job.save!
-    assert_equal job.events.size, 2
+    assert_equal 3, job.events.size
   end
 end

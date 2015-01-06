@@ -5,6 +5,7 @@ class CreateVideoAssets < ActiveRecord::Migration
       t.string  :type
       t.attachment :thumbnail
       t.attachment :asset
+      t.text :asset_meta
 
       t.timestamps
     end

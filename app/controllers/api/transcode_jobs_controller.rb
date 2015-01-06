@@ -1,34 +1,44 @@
 class Api::TranscodeJobsController < ApplicationController
-  # GET /transcode_jobs
-  # GET /transcode_jobs.json
+
+  rescue_from StandardError, :with => :json_error_render_method
+  before_action :set_default_response_format
+
+  # GET /api/transcode_jobs
+  # GET /api/transcode_jobs.json
   def index
     @transcode_jobs = TranscodeJob.all
 
     render json: @transcode_jobs
   end
 
-  # GET /transcode_jobs/1
-  # GET /transcode_jobs/1.json
+  # GET /api/transcode_jobs/1
+  # GET /api/transcode_jobs/1.json
   def show
-    @transcode_job = TranscodeJob.find(params[:id])
+    @video_asset = VideoAsset.where(original_id: params[:id]).first
+    raise ActiveRecord::RecordNotFound unless @video_asset
+    @transcode_job = @video_asset.transcode_job
 
     render json: @transcode_job
   end
 
-  # POST /transcode_jobs
-  # POST /transcode_jobs.json
+  # POST /api/transcode_jobs
+  # POST /api/transcode_jobs.json
   def create
     @transcode_job = TranscodeJob.new(transcode_job_params)
 
-    if @transcode_job.save
+    if rv = @transcode_job.save
+      @transcode_job.trigger
+    end
+
+    if rv
       render json: @transcode_job, status: :created, location: [:api, @transcode_job]
     else
       render json: @transcode_job.errors, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /transcode_jobs/1
-  # PATCH/PUT /transcode_jobs/1.json
+  # PATCH/PUT /api/transcode_jobs/1
+  # PATCH/PUT /api/transcode_jobs/1.json
   def update
     @transcode_job = TranscodeJob.find(params[:id])
 
@@ -39,8 +49,8 @@ class Api::TranscodeJobsController < ApplicationController
     end
   end
 
-  # DELETE /transcode_jobs/1
-  # DELETE /transcode_jobs/1.json
+  # DELETE /api/transcode_jobs/1
+  # DELETE /api/transcode_jobs/1.json
   def destroy
     @transcode_job = TranscodeJob.find(params[:id])
     @transcode_job.destroy
@@ -48,9 +58,21 @@ class Api::TranscodeJobsController < ApplicationController
     head :no_content
   end
 
+  protected
+
+  def set_default_response_format
+    request.format = :json
+  end
+
+  def json_error_render_method error
+    render json: { error: error.message }, status: :unprocessable_entity
+  end
+
   private
-    
+  
   def transcode_job_params
-    params.require(:transcode_job).permit(:status, :params)
+    params.permit(:name, :video_asset_id, :params, :asset_file_name,
+                  :asset_content_type, :asset_file_size,
+                  :video_asset_secret, :callback_url)
   end
 end

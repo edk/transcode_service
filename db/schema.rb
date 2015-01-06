@@ -31,9 +31,17 @@ ActiveRecord::Schema.define(version: 20141221223052) do
 
   create_table "transcode_jobs", force: true do |t|
     t.string   "aasm_state"
+    t.integer  "video_asset_id"
+    t.string   "video_asset_secret"
+    t.string   "callback_url"
+    t.string   "name"
     t.text     "params"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.text     "log"
+    t.string   "asset_file_name"
+    t.string   "asset_content_type"
+    t.integer  "asset_file_size"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
   end
 
   create_table "video_assets", force: true do |t|
@@ -47,6 +55,7 @@ ActiveRecord::Schema.define(version: 20141221223052) do
     t.string   "asset_content_type"
     t.integer  "asset_file_size"
     t.datetime "asset_updated_at"
+    t.text     "asset_meta"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
