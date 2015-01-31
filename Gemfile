@@ -11,9 +11,9 @@ gem 'aws-sdk'
 gem 'aasm'
 gem 'resque'
 gem 'faraday'
+gem 'dotenv-rails'
 
 group :development do
-  gem 'dotenv-rails'
   # gem 'spring'
   gem 'capistrano'
   gem 'guard'

@@ -55,6 +55,7 @@ class TranscodeJob < ActiveRecord::Base
       end
 
       puts "reprocessing"
+      rv = nil
       job.log = output = Kernel.capture(:stderr) do
         rv = job.video_asset.asset.reprocess!
       end
