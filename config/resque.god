@@ -1,3 +1,6 @@
+# sample god config.
+# to test out:
+# god -c config/resque.god
 
 God.watch do |w|
   w.name = 'resque'
