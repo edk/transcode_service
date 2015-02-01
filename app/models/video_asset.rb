@@ -11,7 +11,7 @@ class VideoAsset < ActiveRecord::Base
     styles: {
       thumb:  { geometry: "300x200", format: 'jpg', convert_options: { input: {'v'=>'error'} } },
       mp4: { format: 'mp4', log: true, convert_options: { input: {'v'=>'error'} } },
-      ogg: { format: 'ogg', log: true, convert_options: { input: {'v'=>'error'} } },
+      ogg: { format: 'webm', log: true, convert_options: { input: {'v'=>'error'} } },
     }, processors: [:transcoder]
 
   do_not_validate_attachment_file_type :asset
