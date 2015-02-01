@@ -54,12 +54,12 @@ class TranscodeJob < ActiveRecord::Base
         job.save!
       end
 
-      puts "processing started for #{job.id} #{job.video_asset.name}"
+      puts "processing started for #{job.id} #{job.video_asset.asset_file_name}"
       rv = nil
       job.log = output = Kernel.capture(:stderr) do
         rv = job.video_asset.asset.reprocess!
       end
-      puts "processing complete for #{job.id} #{job.video_asset.name}"
+      puts "processing complete for #{job.id} #{job.video_asset.asset_file_name}"
       rv ? job.complete! : job.fail!
       job.save!
       # if done, call out to webhook with update
