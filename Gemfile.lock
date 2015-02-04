@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/edk/av.git
-  revision: 61926f7025ad57585e854a24f1d0b2f2b5a5e186
+  revision: 064b66e5ea62ac344ebea1200571126f1e5fad31
   branch: master
   specs:
     av (0.8.0)
@@ -86,7 +86,7 @@ GEM
     hike (1.2.3)
     hitimes (1.2.2)
     i18n (0.7.0)
-    json (1.8.1)
+    json (1.8.2)
     listen (2.7.9)
       celluloid (>= 0.15.2)
       rb-fsevent (>= 0.9.3)
@@ -97,7 +97,7 @@ GEM
     method_source (0.8.2)
     mime-types (2.4.3)
     mini_portile (0.6.1)
-    minitest (5.5.0)
+    minitest (5.5.1)
     mono_logger (1.1.0)
     multi_json (1.10.1)
     multipart-post (2.0.0)
