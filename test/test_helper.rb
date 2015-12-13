@@ -3,6 +3,7 @@ require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
 require 'byebug'
 require 'factory_girl_rails'
+require 'minitest/mock'
 
 class MiniTest::Unit::TestCase
   include FactoryGirl::Syntax::Methods
