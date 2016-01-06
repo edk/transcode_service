@@ -23,7 +23,7 @@ class TranscodeJob < ActiveRecord::Base
     end
 
     event :fail, :before => :log_event do
-      transitions :from => [:running, :created], :to => :failed
+      transitions :from => [:running, :created, :completed], :to => :failed
     end
 
     event :cancel, :before => :log_event do
@@ -34,9 +34,14 @@ class TranscodeJob < ActiveRecord::Base
   has_many :events, :class_name => 'TranscodeEvent', :dependent => :destroy
 
   def log_event
+    puts "entered #{aasm.current_event}" if Rails.env.development?
     self.events.build data: "entered #{aasm.current_event}"
   end
-
+  
+  def log_string msg
+    puts msg if Rails.env.development?
+    self.events.build data: msg
+  end
 
   def trigger
     Resque.enqueue(TranscodeJob, self.id)
@@ -69,7 +74,7 @@ class TranscodeJob < ActiveRecord::Base
       job.params = { error: $!.to_s, backtrace: $!.backtrace }
       job.fail!
       job.save(validate: true)
-      puts "Exception processing #{job.id}! #{$!} #{$!.backtrace}"
+      puts "Exception processing #{self.class} #{job.id}! #{$!} #{$!.backtrace.join("\n")}"
     end
   end
 

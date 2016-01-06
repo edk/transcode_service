@@ -24,7 +24,7 @@ class Api::TranscodeJobsController < ApplicationController
   # POST /api/transcode_jobs
   # POST /api/transcode_jobs.json
   def create
-    @transcode_job = TranscodeJob.new(transcode_job_params)
+    @transcode_job = AWSTranscodeJob.new(transcode_job_params)
 
     if rv = @transcode_job.save
       @transcode_job.trigger
