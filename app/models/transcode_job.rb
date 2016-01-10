@@ -34,12 +34,12 @@ class TranscodeJob < ActiveRecord::Base
   has_many :events, :class_name => 'TranscodeEvent', :dependent => :destroy
 
   def log_event
-    puts "entered #{aasm.current_event}" if Rails.env.development?
+    puts "entered #{aasm.current_event}"
     self.events.build data: "entered #{aasm.current_event}"
   end
   
   def log_string msg
-    puts msg if Rails.env.development?
+    puts msg
     self.events.build data: msg
   end
 
