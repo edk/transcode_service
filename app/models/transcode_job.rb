@@ -10,24 +10,29 @@ class TranscodeJob < ActiveRecord::Base
   aasm do
     state :created, :initial => true
     state :running
+    state :poll_timeout # may still be running, but over some reasonable timeout.  may be a bad input file or really big.  may require manual intervention
     state :completed
     state :canceled
     state :failed
 
     event :run, :before => :log_event do
-      transitions :from => [:created, :completed, :failed, :canceled], :to => :running
+      transitions :from => [:created, :completed, :failed, :canceled, :poll_timeout], :to => :running
     end
 
     event :complete, :before => :log_event do
-      transitions :from => [:running, :completed, :created], :to => :completed
+      transitions :from => [:running, :completed, :created, :poll_timeout], :to => :completed
+    end
+
+    event :poll_timeout, :before => :log_event do
+      transitions :from => [:running, :created, :completed, :failed, :canceled, :poll_timeout], :to => :poll_timeout
     end
 
     event :fail, :before => :log_event do
-      transitions :from => [:running, :created, :completed], :to => :failed
+      transitions :from => [:running, :created, :completed, :poll_timeout], :to => :failed
     end
 
     event :cancel, :before => :log_event do
-      transitions :from => [:created, :running, :fail], :to => :canceled
+      transitions :from => [:created, :running, :fail, :poll_timeout], :to => :canceled
     end
   end
 

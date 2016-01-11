@@ -189,9 +189,6 @@ class AWSTranscodeJob < TranscodeJob
     end
   end
   
-  # rv = AWSTranscodeJob.aws_transcode! AWSTranscodeJob.find(60)
-  #  AWSTranscodeJob.perform(60)
-  
   def self.aws_transcode! job
     source_s3        = Aws::S3::Client.new(source_options.merge(region: region))
     transcode_in_s3  = Aws::S3::Client.new(transcode_options.merge(region: region))
@@ -213,6 +210,7 @@ class AWSTranscodeJob < TranscodeJob
     read_resp = ets.poll(timeout: 2.hours)
 
     if read_resp.job.status =~ /progress/i
+      job.poll_timeout!
       job.log_string "Transcode still not done!  check back later or find out why it's still in progress?"
       false
     elsif read_resp.job.status != "Complete"
@@ -223,8 +221,7 @@ class AWSTranscodeJob < TranscodeJob
       true
     end
   end
-  
-  
+    
   protected
   
   # AWSTranscodeJob.clear_all_s3_transcode_objs
@@ -260,6 +257,7 @@ class AWSTranscodeJob < TranscodeJob
       }
      )
   end
+
   def self.delete_keys_from_input
     transcode_in_s3 = Aws::S3::Client.new(transcode_options.merge(region: region))
     s3_resp = transcode_in_s3.list_objects(bucket: transcode_buckets[:in])
@@ -275,7 +273,6 @@ class AWSTranscodeJob < TranscodeJob
      )
   end
   
-  
   def self.source_options
     {
       region: region,
@@ -288,11 +285,9 @@ class AWSTranscodeJob < TranscodeJob
     ENV['S3_BUCKET']
   end
   
-  
   def self.region
     ENV['transcode_region']
   end
-  
   
   def self.transcode_buckets
     {
