@@ -55,7 +55,7 @@ class AWSTranscodeJob < TranscodeJob
 
     # SubmitJob
     ets = ETJob.new local_job: job
-    
+
     if job.created? || job.canceled? || job.failed?
       ets.submit
     end
@@ -66,12 +66,12 @@ class AWSTranscodeJob < TranscodeJob
       job.poll_timeout!
       job.log_string "Transcode still not done!  check back later or find out why it's still in progress?"
       false
-    elsif read_resp.job.status != "Complete"
-      job.log_string "ERROR for job ID: #{ets.job_response.job.id} ... job => #{ets.job_response.job.inspect}"
-      false
-    else
+    elsif read_resp.job.status == "Complete"
       file_assets.move_from_ets_output_to_source
       true
+    else
+      job.log_string "ERROR for job ID: #{ets.job_response.job.id} ... job => #{ets.job_response.job.inspect}"
+      false
     end
   end
     
