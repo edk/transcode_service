@@ -51,12 +51,15 @@ class AWSTranscodeJob < TranscodeJob
                                 local_job: job,
                         transcode_buckets: transcode_buckets
 
-    # Copy Setup
-    file_assets.copy_from_source_to_ets_input
+    file_assets.copy_from_source_to_ets_input # Copy Setup
 
     # SubmitJob
     ets = ETJob.new local_job: job
-    ets.submit
+    
+    if job.created? || job.canceled? || job.failed?
+      ets.submit
+    end
+
     read_resp = ets.poll(timeout: 2.hours)
 
     if read_resp.job.status =~ /progress/i
@@ -74,8 +77,6 @@ class AWSTranscodeJob < TranscodeJob
     
   protected
   
-  # AWSTranscodeJob.clear_all_s3_transcode_objs
-
   def self.list_transcode_in
     transcode_in_s3 = Aws::S3::Client.new(transcode_options.merge(region: region))
     s3_resp = transcode_in_s3.list_objects(bucket: transcode_buckets[:in])
@@ -137,6 +138,14 @@ class AWSTranscodeJob < TranscodeJob
   
   def self.region
     ENV['transcode_region']
+  end
+
+  def self.transcode_options
+    {
+      region: ENV['transcode_region'],
+      access_key_id: ENV['transcode_access_key_id'],
+      secret_access_key: ENV['transcode_secret_access_key'],
+    }
   end
   
   def self.transcode_buckets

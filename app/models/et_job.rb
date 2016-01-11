@@ -10,13 +10,24 @@ class ETJob
     input_key  = @local_job.video_asset.asset.path
     out_key = input_key.split('.')[0..-2].join('.')
 
-    @elastic_transcoder, @job_response = submit_job_to_et input_key, out_key
-    job.log_string "Submitted job ID: #{@job_response.job.id} to AWS Elastic Transcoder"
-    [@elastic_transcoder, @job_response]
+    @job_response = submit_job_to_et input_key, out_key
+    @local_job.log_string "Submitted job ID: #{@job_response.job.id} to AWS Elastic Transcoder"
+    [elastic_transcoder, @job_response]
   end
 
   def submit_job_to_et input_key, out_key
-    job_opts = {
+    elastic_transcoder
+    resp = elastic_transcoder.create_job transcode_job_options
+    @local_job.update_attribute(:job_id, resp.job.id) # save the ETS job id to database
+    resp
+  end
+
+  def elastic_transcoder
+    @elastic_transcoder ||= Aws::ElasticTranscoder::Client.new(transcode_options)
+  end
+
+  def transcode_job_options
+    {
       pipeline_id: pipeline_id,
       input: {
         key: input_key
@@ -36,33 +47,43 @@ class ETJob
       #   "String" => "",
       # }
     }
-    elastictranscoder = Aws::ElasticTranscoder::Client.new(transcode_options)
-    resp = elastictranscoder.create_job job_opts
-    @local_job.update_attribute(:job_id, resp.job.id) # save the ETS job id to database
-    [elastictranscoder, resp]
   end
 
-  def poll options
-    timeout = options[:timeout]
-    start_time = Time.now
-    done, count = false, 0
+  def poll(options = {})
+    timeout = options[:timeout] || 2.hours
+    delay   = options[:delay] || 60
 
-    #### poll in loop.  doing this in a blocking manner to keep the same semantics as the previous transcoder
-    while !done do
-      sleep 30
-      read_resp = @elastic_transcoder.read_job(id: @job_response.job.id)
-      job.log_string "#{Time.now.iso8601}   count => #{count}, polling job ID #{@job_response.job.id}, status => #{read_resp.job.status}"
-      break unless read_resp.job.status =~ /progress/i
+    begin
+      elastic_transcoder.wait_until(:job_complete, id: @local_job.job_id ) { |w|
+        w.max_attempts = timout / delay # two hours based on a 60 sec delay
+        w.delay = delay
+      }
+    rescue Waiters::Errors::WaiterFailed => e
+      rv = check_status
 
-      count += 1
-
-      if Time.now > (start_time + timeout)
-        puts "Timeout, exiting polling loop"
-        break
+      case rv.job.status
+      when /progressing/i
+        @local_job.poll_timeout!
+      when /completed/i
+        @local_job.complete!
+      when /warning/i
+        @local_job.poll_timeout!
+      when /error/i
+        @local_job.fail!
+      else
+        @local_job.log_string "Unknown ETS Job status: #{rv.job.status} for job id: #{rv.job.id}"
+        @local_job.fail!
       end
+
+      return e
     end
     
-    job.log_string "polling finished job ID: #{@job_response.job.id} ... status => #{read_resp.job.status}"
+    check_status
+  end
+
+  def check_status
+    read_resp = elastic_transcoder.read_job(id: @local_job.job_id)
+    @local_job.log_string "#{Time.now.iso8601} polling job ID #{read_resp.job.id}, status => #{read_resp.job.status}"
     read_resp
   end
 
@@ -71,11 +92,7 @@ class ETJob
   protected
 
   def transcode_options
-    {
-      region: ENV['transcode_region'],
-      access_key_id: ENV['transcode_access_key_id'],
-      secret_access_key: ENV['transcode_secret_access_key'],
-    }
+    AWSTranscodeJob.transcode_options
   end
 
   def pipeline_id

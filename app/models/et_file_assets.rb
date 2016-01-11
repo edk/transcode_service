@@ -11,12 +11,26 @@ class ETFileAssets
     @transcode_buckets = options[:transcode_buckets]
   end
 
-  def copy_from_source_to_ets_input
+  def copy_from_source_to_ets_input force_copy = false
     #### copy from video asset to transcoder in bucket
-    resp           = @source.get_object( bucket: @source_bucket, key: @local_job.video_asset.asset.path )
-    transcode_resp = @transcode_in.put_object( bucket: @transcode_buckets[:in], key: @local_job.video_asset.asset.path, body: resp.body )
-    @local_job.log_string "Copied #{@local_job.video_asset.asset.path} from #{@source_bucket} to #{@transcode_buckets[:in]}"
-    transcode_resp
+
+    # If transcode out in bucket already has the same object, skip the copy
+    key = @local_job.video_asset.asset.path
+    found = true
+    begin
+      transcode_resp = @transcode_in.head_object( bucket: @transcode_buckets[:in], key: key )
+    rescue
+      found = false
+    end
+
+    if !found || force_copy
+      resp           = @source.get_object( bucket: @source_bucket, key: key )
+      transcode_resp = @transcode_in.put_object( bucket: @transcode_buckets[:in], key: key, body: resp.body )
+      @local_job.log_string "Copied #{key} from #{@source_bucket} to #{@transcode_buckets[:in]}"
+      transcode_resp
+    else
+      true
+    end
   end
 
   def move_from_ets_output_to_source
