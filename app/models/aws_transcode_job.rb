@@ -56,7 +56,7 @@ class AWSTranscodeJob < TranscodeJob
     # SubmitJob
     ets = ETJob.new local_job: job
 
-    if job.created? || job.canceled? || job.failed?
+    if !job.job_id.present?
       ets.submit
     end
 

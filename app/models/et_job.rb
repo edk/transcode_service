@@ -17,7 +17,7 @@ class ETJob
 
   def submit_job_to_et input_key, out_key
     elastic_transcoder
-    resp = elastic_transcoder.create_job transcode_job_options
+    resp = elastic_transcoder.create_job transcode_job_options(input_key: input_key)
     @local_job.update_attribute(:job_id, resp.job.id) # save the ETS job id to database
     resp
   end
@@ -26,11 +26,11 @@ class ETJob
     @elastic_transcoder ||= Aws::ElasticTranscoder::Client.new(transcode_options)
   end
 
-  def transcode_job_options
+  def transcode_job_options options = {}
     {
       pipeline_id: pipeline_id,
       input: {
-        key: input_key
+        key: options[:input_key]
       },
       outputs: [
         {
