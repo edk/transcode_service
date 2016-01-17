@@ -37,7 +37,7 @@ class ETFileAssets
   end
 
   def move_from_ets_output_to_source
-    @local_job.log_string "Completing job ID: #{ets.job_response.job.id}"
+    @local_job.log_string "Completing job ID: #{@local_job.job_id}"
 
     input_key  = @local_job.video_asset.asset.path
     out_key = input_key.split('.')[0..-2].join('.')

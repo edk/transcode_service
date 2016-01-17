@@ -74,6 +74,25 @@ class AWSTranscodeJob < TranscodeJob
       false
     end
   end
+
+  def continue_polling
+    return nil if !self.job_id.present?
+
+    ets = ETJob.new local_job: self
+    read_resp = ets.poll(timeout: 2.hours)
+
+    if read_resp.job.status =~ /progress/i
+      poll_timeout!
+      log_string "Transcode still not done!  check back later or find out why it's still in progress?"
+      false
+    elsif read_resp.job.status == "Complete"
+      file_assets.move_from_ets_output_to_source
+      true
+    else
+      log_string "ERROR for job ID: #{ets.job_response.job.id} ... job => #{ets.job_response.job.inspect}"
+      false
+    end
+  end
     
   protected
   def reset_for_re_encode
