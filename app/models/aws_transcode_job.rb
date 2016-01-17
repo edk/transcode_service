@@ -76,6 +76,12 @@ class AWSTranscodeJob < TranscodeJob
   end
     
   protected
+  def reset_for_re_encode
+    self.aasm_state = "created"
+    self.params = nil
+    events.delete_all
+    save
+  end
   
   def self.list_transcode_in
     transcode_in_s3 = Aws::S3::Client.new(transcode_options.merge(region: region))
