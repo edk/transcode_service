@@ -6,10 +6,15 @@ class ETJob
     @local_job = options[:local_job]
   end
 
-  def submit
+  def input_key
     input_key  = @local_job.video_asset.asset.path
-    out_key = input_key.split('.')[0..-2].join('.')
+  end
 
+  def out_key
+    out_key = input_key.split('.')[0..-2].join('.')
+  end
+
+  def submit
     @job_response = submit_job_to_et input_key, out_key
     @local_job.log_string "Submitted job ID: #{@job_response.job.id} to AWS Elastic Transcoder"
     [elastic_transcoder, @job_response]
@@ -17,7 +22,7 @@ class ETJob
 
   def submit_job_to_et input_key, out_key
     elastic_transcoder
-    resp = elastic_transcoder.create_job transcode_job_options(input_key: input_key)
+    resp = elastic_transcoder.create_job transcode_job_options
     @local_job.update_attribute(:job_id, resp.job.id) # save the ETS job id to database
     resp
   end
@@ -26,11 +31,11 @@ class ETJob
     @elastic_transcoder ||= Aws::ElasticTranscoder::Client.new(transcode_options)
   end
 
-  def transcode_job_options options = {}
+  def transcode_job_options
     {
       pipeline_id: pipeline_id,
       input: {
-        key: options[:input_key]
+        key: input_key
       },
       outputs: [
         {
