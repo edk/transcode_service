@@ -24,9 +24,12 @@ class ETFileAssets
     end
 
     if !found || force_copy
-      resp           = @source.get_object( bucket: @source_bucket, key: key )
-      transcode_resp = @transcode_in.put_object( bucket: @transcode_buckets[:in], key: key, body: resp.body )
+      temp_file = Tempfile.new("source_asset")
+      resp           = @source.get_object( bucket: @source_bucket, key: key, response_target: temp_file.path )
+      transcode_resp = @transcode_in.put_object( bucket: @transcode_buckets[:in], key: key, body: File.open(temp_file,'r') )
       @local_job.log_string "Copied #{key} from #{@source_bucket} to #{@transcode_buckets[:in]}"
+      temp_file.unlink
+      @local_job.log_string "deleted temp file #{temp_file.path}"
       transcode_resp
     else
       true
@@ -51,12 +54,15 @@ class ETFileAssets
     keys.each do |target_key|
       # target key needs to look something like this:            video_assets/assets/000/000/014/mp4/my_video.mp4
       # key is missing the /:style/ in the transcode out bucket: video_assets/assets/000/000/014/my_video.mp4
+      temp_file = Tempfile.new("dest_asset")
       key = all_objs.detect { |o| target_key.split('/').last == o.split('/').last }
-      s3_resp_source = @transcode_out.get_object( bucket: @transcode_buckets[:out], key: key )
-      s3_resp_target = @source.put_object( bucket: @source_bucket, key: target_key, body: s3_resp_source.body )
+      s3_resp_source = @transcode_out.get_object( bucket: @transcode_buckets[:out], key: key, response_target: temp_file.path )
+      s3_resp_target = @source.put_object( bucket: @source_bucket, key: target_key, body: File.open(temp_file, 'r') )
       @local_job.log_string "Copied from #{@transcode_buckets[:out]}/#{key} to #{@source_bucket}/#{target_key}"
       delete_resp = @transcode_out.delete_object( bucket: @transcode_buckets[:out], key: key )
       @local_job.log_string "Deleted #{key} from #{@transcode_buckets[:out]} #{delete_resp.inspect}"
+      temp_file.unlink
+      @local_job.log_string "deleted temp file #{temp_file.path}"
     end
     
     # handle thumbnails.  AWS doesn't allow a single thumbnail
