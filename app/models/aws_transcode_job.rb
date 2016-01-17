@@ -26,8 +26,6 @@ class AWSTranscodeJob < TranscodeJob
       rv = aws_transcode! job
       puts "processing complete for #{job.id} #{job.video_asset.asset_file_name}"
 
-      rv ? job.complete! : job.fail!
-      
       job.save!
       # call out to webhook with update
       job.trigger_callback
@@ -68,15 +66,28 @@ class AWSTranscodeJob < TranscodeJob
       false
     elsif read_resp.job.status == "Complete"
       file_assets.move_from_ets_output_to_source
+      job.complete!
       true
     else
       job.log_string "ERROR for job ID: #{ets.job_response.job.id} ... job => #{ets.job_response.job.inspect}"
+      job.fail!
       false
     end
   end
 
   def continue_polling
     return nil if !self.job_id.present?
+
+    source_s3        = Aws::S3::Client.new(self.class.source_options.merge(   region: self.class.region))
+    transcode_in_s3  = Aws::S3::Client.new(self.class.transcode_options.merge(region: self.class.region))
+    transcode_out_s3 = Aws::S3::Client.new(self.class.transcode_options.merge(region: self.class.region))
+
+    file_assets = ETFileAssets.new source: source_s3,
+                            source_bucket: self.class.source_bucket,
+                             transcode_in: transcode_in_s3,
+                            transcode_out: transcode_out_s3,
+                                local_job: self,
+                        transcode_buckets: self.class.transcode_buckets
 
     ets = ETJob.new local_job: self
     read_resp = ets.poll(timeout: 2.hours)
