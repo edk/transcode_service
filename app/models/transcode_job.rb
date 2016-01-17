@@ -16,7 +16,7 @@ class TranscodeJob < ActiveRecord::Base
     state :failed
 
     event :run, :before => :log_event do
-      transitions :from => [:created, :completed, :failed, :canceled, :poll_timeout], :to => :running
+      transitions :from => [:created, :completed, :failed, :canceled, :poll_timeout, :running], :to => :running
     end
 
     event :complete, :before => :log_event do
