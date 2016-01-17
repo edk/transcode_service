@@ -58,7 +58,7 @@ class ETJob
         w.max_attempts = timout / delay # two hours based on a 60 sec delay
         w.delay = delay
       }
-    rescue Waiters::Errors::WaiterFailed => e
+    rescue Aws::Waiters::Errors::WaiterFailed => e
       rv = check_status
 
       case rv.job.status
