@@ -55,7 +55,7 @@ class ETJob
 
     begin
       elastic_transcoder.wait_until(:job_complete, id: @local_job.job_id ) { |w|
-        w.max_attempts = timout / delay # two hours based on a 60 sec delay
+        w.max_attempts = timeout / delay # two hours based on a 60 sec delay
         w.delay = delay
       }
     rescue Aws::Waiters::Errors::WaiterFailed => e
