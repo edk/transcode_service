@@ -85,7 +85,9 @@ class TranscodeJob < ActiveRecord::Base
 
   def trigger_callback
     return unless callback_url.present?
-    conn = Faraday.new do |faraday|
+    faraday_opts = {}
+    faraday_opts.merge!(:ssl=>{:verify=>false}) if ENV['DEV_DISABLE_PEER_VERIFICATION']
+    conn = Faraday.new(faraday_opts) do |faraday|
       faraday.request  :url_encoded             # form-encode POST params
       faraday.response :logger                  # log requests to STDOUT
       faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
