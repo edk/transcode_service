@@ -33,7 +33,7 @@ class Api::TranscodeJobsController < ApplicationController
     end
 
     if rv
-      render json: @transcode_job, status: 202, location: [:api, @transcode_job]
+      render json: @transcode_job.as_json.merge({ location: [:api, @transcode_job] }), status: 202
     else
       render json: @transcode_job.errors, status: :unprocessable_entity
     end
