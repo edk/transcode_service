@@ -33,7 +33,7 @@ class Api::TranscodeJobsController < ApplicationController
     end
 
     if rv
-      render json: @transcode_job, status: :accepted, location: [:api, @transcode_job]
+      render json: @transcode_job, status: 202, location: [:api, @transcode_job]
     else
       render json: @transcode_job.errors, status: :unprocessable_entity
     end
