@@ -32,13 +32,8 @@ class Api::TranscodeJobsController < ApplicationController
       @transcode_job.trigger
     end
 
-    Rails.logger.error("transcode_job_params = #{transcode_job_params.inspect}")
-    Rails.logger.error("rv = #{rv.inspect}")
-    Rails.logger.error("@transcode_job = #{@transcode_job.inspect}")
-    Rails.logger.error("@transcode_job.errors = #{@transcode_job.errors.inspect}")
-
     if rv
-      render json: @transcode_job, status: :created, location: [:api, @transcode_job]
+      render json: @transcode_job, status: :accepted, location: [:api, @transcode_job]
     else
       render json: @transcode_job.errors, status: :unprocessable_entity
     end
