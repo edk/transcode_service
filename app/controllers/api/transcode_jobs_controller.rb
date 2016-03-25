@@ -3,6 +3,8 @@ class Api::TranscodeJobsController < ApplicationController
   rescue_from StandardError, :with => :json_error_render_method
   before_action :set_default_response_format
 
+  skip_before_filter :authenticate, :only => [:ping]
+
   # GET /api/transcode_jobs
   # GET /api/transcode_jobs.json
   def index
@@ -58,6 +60,10 @@ class Api::TranscodeJobsController < ApplicationController
     @transcode_job.destroy
 
     head :no_content
+  end
+
+  def ping
+    render :text => Time.now.iso8601.to_s
   end
 
   protected
