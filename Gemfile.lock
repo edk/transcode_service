@@ -209,7 +209,7 @@ DEPENDENCIES
   guard-minitest
   paperclip!
   paperclip-av-transcoder
-  rails (= 4.1.8)
+  rails (~> 4.1)
   rails-api
   resque
   sqlite3
